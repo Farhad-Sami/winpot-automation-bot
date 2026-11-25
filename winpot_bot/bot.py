@@ -57,6 +57,8 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 BTN_PROFILES = "👤 Profiles"
@@ -393,6 +395,20 @@ async def _execute_automation(
     await status_msg.edit_text(text)
 
 
+async def _send_dashboard(update: Update, uid: int | str) -> None:
+    """Send the main dashboard and quick actions."""
+    if not update.message:
+        return
+    settings = load_settings(uid)
+    profiles = list_profiles(uid)
+    await update.message.reply_text(
+        _main_menu_text(settings, profiles),
+        parse_mode="HTML",
+        reply_markup=REPLY_KEYBOARD,
+    )
+    await update.message.reply_text("Quick Actions:", reply_markup=_main_menu_keyboard())
+
+
 async def token_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /token <token> to set and verify the access token."""
     if not update.message:
@@ -405,10 +421,12 @@ async def token_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not status.allowed:
         await update.message.reply_text(f"🔒 Token rejected: {status.reason}")
         return
-    set_access_token(token, _uid(update))
+    uid = _uid(update)
+    set_access_token(token, uid)
     context.user_data.pop("awaiting", None)
     await _delete_secret_message(update)
-    await update.message.reply_text("✅ Access token verified and saved! Send /start to begin.")
+    await update.message.reply_text("✅ Access token verified and saved!")
+    await _send_dashboard(update, uid)
 
 
 async def openrouter_key_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -728,9 +746,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         if not status.allowed:
             await update.message.reply_text(f"🔒 Token rejected: {status.reason}\nTry again or use /token <token>.")
             return
-        set_access_token(text, _uid(update))
+        uid = _uid(update)
+        set_access_token(text, uid)
         await _delete_secret_message(update)
-        await update.message.reply_text("✅ Access token verified and saved! Send /start to begin.")
+        await update.message.reply_text("✅ Access token verified and saved!")
+        await _send_dashboard(update, uid)
         return
 
     if not await _require_access(update, context):
@@ -867,6 +887,11 @@ async def _post_init(application: Application) -> None:
     )
 
 
+async def _error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log Telegram handler errors cleanly without crashing the polling loop."""
+    logger.warning("Telegram update error: %s", context.error)
+
+
 def main() -> None:
     """Start the Telegram bot."""
     load_env()
@@ -876,7 +901,16 @@ def main() -> None:
 
     ensure_chromium_installed()
 
-    app = Application.builder().token(token).post_init(_post_init).build()
+    app = (
+        Application.builder()
+        .token(token)
+        .connect_timeout(15.0)
+        .read_timeout(30.0)
+        .write_timeout(30.0)
+        .post_init(_post_init)
+        .build()
+    )
+    app.add_error_handler(_error_handler)
     app.add_handler(CommandHandler("start", start_cmd))
     app.add_handler(CommandHandler("token", token_cmd))
     app.add_handler(CommandHandler("openrouter_key", openrouter_key_cmd))
