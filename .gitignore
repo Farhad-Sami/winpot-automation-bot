@@ -12,6 +12,6 @@ profiles/
 browsers/
 settings.json
 user_settings/
-
+graphify-out
 
 # chmod +x ./winpot-bot-macos && xattr -d com.apple.quarantine ./winpot-bot-macos
