@@ -23,9 +23,6 @@ jobs:
           - os: macos-latest
             src_name: dist/winpot-bot
             asset_name: winpot-bot-macos
-          # - os: windows-latest
-          #   src_name: dist/winpot-bot.exe
-          #   asset_name: winpot-bot-windows.exe
 
     runs-on: ${{ matrix.os }}
 
@@ -78,4 +75,3 @@ jobs:
           files: |
             release-assets/winpot-bot-linux
             release-assets/winpot-bot-macos
-            # release-assets/winpot-bot-windows.exe

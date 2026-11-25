@@ -61,7 +61,7 @@ async def verify_access_token(token: str) -> AccessStatus:
         return AccessStatus(allowed=False, reason="Access server is not configured.")
 
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             resp = await client.get(access_url, params={"token": cleaned})
             resp.raise_for_status()
             data = resp.json()
