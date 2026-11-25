@@ -74,10 +74,12 @@ REPLY_KEYBOARD = ReplyKeyboardMarkup(
 
 
 def load_env() -> None:
-    """Load environment variables from app_dir/.env or bundled .env."""
-    for candidate in (app_dir() / ".env", bundle_dir() / ".env"):
-        if candidate.exists():
-            load_dotenv(candidate, override=False)
+    """Load environment variables from app_dir/bundle_dir (.env and config.env)."""
+    for base in (app_dir(), bundle_dir()):
+        for name in (".env", "config.env"):
+            candidate = base / name
+            if candidate.exists():
+                load_dotenv(candidate, override=False)
 
 
 def _uid(update: Update) -> int | str:
@@ -91,6 +93,15 @@ def _mask_secret(value: str) -> str:
     if len(value) <= 8:
         return "****"
     return f"{value[:4]}...{value[-4:]}"
+
+
+async def _delete_secret_message(update: Update) -> None:
+    """Best-effort removal of secret-bearing messages from chat history."""
+    if update.message:
+        try:
+            await update.message.delete()
+        except Exception:
+            pass
 
 
 async def _require_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
@@ -281,7 +292,8 @@ async def _execute_visit(update: Update, profiles: list[str], url: str) -> None:
     if not chat_message:
         return
 
-    settings = load_settings(_uid(update))
+    uid = _uid(update)
+    settings = load_settings(uid)
     status_msg = await chat_message.reply_text(
         f"⏳ Visiting {url} using profile(s): {', '.join(profiles)}..."
     )
@@ -289,6 +301,7 @@ async def _execute_visit(update: Update, profiles: list[str], url: str) -> None:
         profile_names=profiles,
         url=url,
         headless=settings.headless,
+        user_id=uid,
         max_concurrency=settings.max_concurrency,
     )
 
@@ -323,7 +336,8 @@ async def _execute_automation(
     if not chat_message:
         return
 
-    settings = load_settings(_uid(update))
+    uid = _uid(update)
+    settings = load_settings(uid)
     dry_run = settings.confirm_before_bet and not confirmed
     status_msg = await chat_message.reply_text(
         f"🤖 {'Preparing' if dry_run else 'Running'} on {url} "
@@ -338,6 +352,7 @@ async def _execute_automation(
         use_vision=settings.use_vision,
         custom_instructions=settings.system_prompt,
         dry_run_before_submit=dry_run,
+        user_id=uid,
         max_concurrency=settings.max_concurrency,
     )
 
@@ -392,6 +407,7 @@ async def token_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     set_access_token(token, _uid(update))
     context.user_data.pop("awaiting", None)
+    await _delete_secret_message(update)
     await update.message.reply_text("✅ Access token verified and saved! Send /start to begin.")
 
 
@@ -404,6 +420,7 @@ async def openrouter_key_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
     set_openrouter_api_key(context.args[0].strip(), _uid(update))
     context.user_data.pop("awaiting", None)
+    await _delete_secret_message(update)
     await update.message.reply_text("✅ OpenRouter API key saved for your account!")
 
 
@@ -415,7 +432,7 @@ async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     context.user_data.pop("awaiting", None)
     settings = load_settings(_uid(update))
-    profiles = list_profiles()
+    profiles = list_profiles(_uid(update))
     await update.message.reply_text(
         _main_menu_text(settings, profiles),
         parse_mode="HTML",
@@ -449,7 +466,7 @@ async def profiles_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     """Handle /profiles."""
     if not update.message or not await _require_access(update, context):
         return
-    profiles = list_profiles()
+    profiles = list_profiles(_uid(update))
     selected = _get_selected_profiles(context)
     await update.message.reply_text(
         _profiles_text(profiles, selected),
@@ -471,7 +488,7 @@ async def login_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"🔓 Opening browser for '{name}'. Log in manually, then close the browser window to save."
     )
     try:
-        await open_profile_for_login(name, url=settings.default_url)
+        await open_profile_for_login(name, url=settings.default_url, user_id=_uid(update))
         await msg.edit_text(f"✅ Session saved for profile '{name}'.")
     except Exception as exc:
         await msg.edit_text(f"Error opening login for '{name}': {exc}")
@@ -485,7 +502,7 @@ async def create_profile_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text("Usage: /create_profile <name>")
         return
     try:
-        path = create_profile(context.args[0])
+        path = create_profile(context.args[0], user_id=_uid(update))
         await update.message.reply_text(f"✅ Created profile '{path.name}'.")
     except (ValueError, FileExistsError) as exc:
         await update.message.reply_text(str(exc))
@@ -499,7 +516,7 @@ async def rename_profile_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text("Usage: /rename_profile <old_name> <new_name>")
         return
     try:
-        path = rename_profile(context.args[0], context.args[1])
+        path = rename_profile(context.args[0], context.args[1], user_id=_uid(update))
         await update.message.reply_text(f"✅ Renamed profile to '{path.name}'.")
     except (ValueError, FileNotFoundError, FileExistsError) as exc:
         await update.message.reply_text(str(exc))
@@ -513,7 +530,7 @@ async def delete_profile_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text("Usage: /delete_profile <name>")
         return
     try:
-        delete_profile(context.args[0])
+        delete_profile(context.args[0], user_id=_uid(update))
         await update.message.reply_text(f"🗑️ Deleted profile '{context.args[0]}'.")
     except (ValueError, FileNotFoundError) as exc:
         await update.message.reply_text(str(exc))
@@ -546,14 +563,14 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if data == "menu_main":
         settings = load_settings(uid)
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         await query.edit_message_text(
             _main_menu_text(settings, profiles),
             parse_mode="HTML",
             reply_markup=_main_menu_keyboard(),
         )
     elif data == "menu_profiles":
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         await query.edit_message_text(
             _profiles_text(profiles, selected),
             parse_mode="HTML",
@@ -616,14 +633,14 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             selected.remove(name)
         else:
             selected.add(name)
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         await query.edit_message_text(
             _profiles_text(profiles, selected),
             parse_mode="HTML",
             reply_markup=_profiles_keyboard(profiles, selected),
         )
     elif data == "select_all_profiles":
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         if set(profiles).issubset(selected):
             selected.clear()
         else:
@@ -634,7 +651,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             reply_markup=_profiles_keyboard(profiles, selected),
         )
     elif data == "login_selected":
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         targets = sorted(selected & set(profiles))
         if len(targets) != 1:
             await query.message.reply_text("Select exactly 1 profile to open for manual login.")
@@ -645,7 +662,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"🔓 Opening browser for '{name}'. Log in manually, then close the browser window to save."
         )
         try:
-            await open_profile_for_login(name, url=settings.default_url)
+            await open_profile_for_login(name, url=settings.default_url, user_id=uid)
             await msg.edit_text(f"✅ Session saved for profile '{name}'.")
         except Exception as exc:
             await msg.edit_text(f"Error opening login for '{name}': {exc}")
@@ -653,22 +670,22 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         context.user_data["awaiting"] = "create_profile"
         await query.message.reply_text("Send the new profile name (letters, numbers, '-' or '_'):")
     elif data == "delete_selected":
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         targets = sorted(selected & set(profiles))
         if not targets:
             await query.message.reply_text("Select at least one profile first.")
             return
         for name in targets:
-            delete_profile(name)
+            delete_profile(name, user_id=uid)
             selected.discard(name)
-        remaining = list_profiles()
+        remaining = list_profiles(uid)
         await query.edit_message_text(
             _profiles_text(remaining, selected),
             parse_mode="HTML",
             reply_markup=_profiles_keyboard(remaining, selected),
         )
     elif data in {"quick_winpot", "visit_winpot_selected"}:
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         targets = sorted(selected & set(profiles))
         if data == "visit_winpot_selected" and not targets:
             await query.message.reply_text("Tap one or more profiles first to select them.")
@@ -712,6 +729,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await update.message.reply_text(f"🔒 Token rejected: {status.reason}\nTry again or use /token <token>.")
             return
         set_access_token(text, _uid(update))
+        await _delete_secret_message(update)
         await update.message.reply_text("✅ Access token verified and saved! Send /start to begin.")
         return
 
@@ -733,7 +751,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
     if text == BTN_QUICK_WINPOT:
         context.user_data.pop("awaiting", None)
-        profiles = list_profiles()
+        profiles = list_profiles(uid)
         selected = _get_selected_profiles(context)
         targets = sorted(selected & set(profiles)) or (profiles[:1] if profiles else ["winpot"])
         settings = load_settings(uid)
@@ -743,6 +761,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     awaiting = context.user_data.pop("awaiting", None)
     if awaiting == "openrouter_api_key":
         settings = set_openrouter_api_key(text, uid)
+        await _delete_secret_message(update)
         await update.message.reply_text(
             _settings_text(settings),
             parse_mode="HTML",
@@ -767,13 +786,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
     if awaiting == "create_profile":
         try:
-            path = create_profile(text)
+            path = create_profile(text, user_id=uid)
             await update.message.reply_text(f"✅ Created profile '{path.name}'.")
         except (ValueError, FileExistsError) as exc:
             await update.message.reply_text(str(exc))
         return
 
-    saved = list_profiles()
+    saved = list_profiles(uid)
     selected_list = sorted(_get_selected_profiles(context) & set(saved))
     current_settings = load_settings(uid)
     try:
@@ -797,19 +816,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await _execute_automation(update, context, routed["profiles"], routed["url"], routed["goal"])
     elif tool == "create_profile":
         try:
-            path = create_profile(routed["name"])
+            path = create_profile(routed["name"], user_id=uid)
             await update.message.reply_text(f"✅ Created profile '{path.name}'.")
         except (ValueError, FileExistsError) as exc:
             await update.message.reply_text(str(exc))
     elif tool == "rename_profile":
         try:
-            path = rename_profile(routed["old_name"], routed["new_name"])
+            path = rename_profile(routed["old_name"], routed["new_name"], user_id=uid)
             await update.message.reply_text(f"✅ Renamed profile to '{path.name}'.")
         except (ValueError, FileNotFoundError, FileExistsError) as exc:
             await update.message.reply_text(str(exc))
     elif tool == "delete_profile":
         try:
-            delete_profile(routed["name"])
+            delete_profile(routed["name"], user_id=uid)
             await update.message.reply_text(f"🗑️ Deleted profile '{routed['name']}'.")
         except (ValueError, FileNotFoundError) as exc:
             await update.message.reply_text(str(exc))

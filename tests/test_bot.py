@@ -18,6 +18,7 @@ from winpot_bot.browser_manager import (
     list_profiles,
     rename_profile,
     sanitize_profile_name,
+    validate_url,
 )
 from winpot_bot.jev_agent import validate_decision
 from winpot_bot.router import parse_route_json
@@ -203,3 +204,25 @@ def test_access_token_validation() -> None:
         now=1796000000,
     )
     assert inactive.allowed is False
+
+
+def test_validate_url_blocks_ssrf_and_schemes() -> None:
+    assert validate_url("winpot.mx/sport") == "https://winpot.mx/sport"
+    assert validate_url("https://www.winpot.mx/sport") == "https://www.winpot.mx/sport"
+    for bad in [
+        "file:///etc/passwd",
+        "javascript:alert(1)",
+        "http://localhost:8080",
+        "http://127.0.0.1/admin",
+        "http://169.254.169.254/latest/meta-data/",
+        "http://192.168.1.1",
+    ]:
+        with pytest.raises(ValueError):
+            validate_url(bad)
+
+
+def test_per_user_profile_isolation(tmp_path: Path) -> None:
+    create_profile("acc1", user_id=111, base_dir=tmp_path)
+    create_profile("acc2", user_id=222, base_dir=tmp_path)
+    assert list_profiles(user_id=111, base_dir=tmp_path) == ["acc1"]
+    assert list_profiles(user_id=222, base_dir=tmp_path) == ["acc2"]

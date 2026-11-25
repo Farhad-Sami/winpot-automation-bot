@@ -13,10 +13,10 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact: winpot-bot-linux
-          - os: macos-latest
-            artifact: winpot-bot-macos
-          - os: windows-latest
-            artifact: winpot-bot-windows.exe
+          # - os: macos-latest
+          #   artifact: winpot-bot-macos
+          # - os: windows-latest
+          #   artifact: winpot-bot-windows.exe
 
     runs-on: ${{ matrix.os }}
 
@@ -28,6 +28,13 @@ jobs:
 
       - name: Sync dependencies
         run: uv sync
+
+      - name: Write .env from repository secrets
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ACCESS_URL: ${{ secrets.ACCESS_URL }}
+        run: |
+          uv run python -c "import os; open('.env', 'w', encoding='utf-8').write(f'TELEGRAM_BOT_TOKEN={os.environ.get(\"TELEGRAM_BOT_TOKEN\", \"\")}\nACCESS_URL={os.environ.get(\"ACCESS_URL\", \"\")}\n')"
 
       - name: Build executable
         run: uv run python build_exe.py

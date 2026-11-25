@@ -73,10 +73,15 @@ def save_settings(
     user_id: int | str = "default",
     path: Path | None = None,
 ) -> BotSettings:
-    """Persist settings for `user_id` to disk."""
+    """Persist settings for `user_id` to disk with restrictive permissions."""
     target = _resolve_path(user_id, path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(asdict(settings), indent=2), encoding="utf-8")
+    try:
+        os.chmod(target.parent, 0o700)
+        os.chmod(target, 0o600)
+    except OSError:
+        pass
     return settings
 
 

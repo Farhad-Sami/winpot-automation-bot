@@ -15,7 +15,7 @@ from playwright.async_api import Page, async_playwright
 
 from jev_ultrafast.model import action_space
 from winpot_bot.ai import extract_json, openrouter_chat
-from winpot_bot.browser_manager import PageContent, get_profile_dir
+from winpot_bot.browser_manager import PageContent, get_profile_dir, validate_url
 from winpot_bot.paths import bundle_dir
 
 SNAPSHOT_JS_PATH = bundle_dir() / "jev_ultrafast" / "snapshot.js"
@@ -267,14 +267,13 @@ async def run_automation(
     use_vision: bool = False,
     custom_instructions: str = "",
     dry_run_before_submit: bool = False,
+    user_id: int | str = "default",
     base_dir: Path | None = None,
     max_steps: int = MAX_STEPS,
 ) -> AutomationResult:
     """Run a multi-step Jev automation loop using a persistent Playwright profile."""
-    profile_dir = get_profile_dir(profile_name, base_dir=base_dir)
-    target_url = url.strip()
-    if not target_url.startswith(("http://", "https://")):
-        target_url = f"https://{target_url}"
+    target_url = validate_url(url)
+    profile_dir = get_profile_dir(profile_name, user_id=user_id, base_dir=base_dir)
 
     snapshot_js = SNAPSHOT_JS_PATH.read_text(encoding="utf-8")
     steps: list[str] = []
@@ -356,6 +355,7 @@ async def run_automations(
     use_vision: bool = False,
     custom_instructions: str = "",
     dry_run_before_submit: bool = False,
+    user_id: int | str = "default",
     base_dir: Path | None = None,
     max_concurrency: int = 5,
 ) -> list[AutomationResult | tuple[str, Exception]]:
@@ -374,6 +374,7 @@ async def run_automations(
                     use_vision=use_vision,
                     custom_instructions=custom_instructions,
                     dry_run_before_submit=dry_run_before_submit,
+                    user_id=user_id,
                     base_dir=base_dir,
                 )
             except Exception as exc:

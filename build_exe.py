@@ -25,14 +25,15 @@ def main() -> None:
         f"{ROOT / 'jev_ultrafast' / 'snapshot.js'}{sep}jev_ultrafast",
         "--collect-all",
         "playwright",
-        "--hidden-import",
+        "--collect-submodules",
         "winpot_bot",
-        "--hidden-import",
-        "jev_ultrafast.model",
+        "--collect-submodules",
+        "jev_ultrafast",
     ]
-    env_file = ROOT / ".env"
-    if env_file.exists():
-        cmd.extend(["--add-data", f"{env_file}{sep}."])
+    for cfg in ("config.env", ".env"):
+        cfg_file = ROOT / cfg
+        if cfg_file.exists():
+            cmd.extend(["--add-data", f"{cfg_file}{sep}."])
 
     cmd.append(str(ROOT / "winpot_bot" / "bot.py"))
     subprocess.run(cmd, check=True)
