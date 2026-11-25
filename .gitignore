@@ -9,5 +9,6 @@ artifacts/
 
 dist/
 profiles/
+browsers/
 settings.json
 user_settings/

@@ -21,6 +21,8 @@ from winpot_bot.paths import app_dir
 logger = logging.getLogger(__name__)
 
 PROFILES_DIR = app_dir() / "profiles"
+BROWSERS_DIR = app_dir() / "browsers"
+os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(BROWSERS_DIR))
 PROFILE_NAME_RE = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 BLOCKED_HOSTS = {"localhost", "localhost.localdomain"}
 
