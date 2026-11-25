@@ -1,337 +1,413 @@
 {
   "communities": {
     "0": [
-      "argparse",
-      "atexit",
-      "datetime",
-      "examples_flights",
-      "examples_flights_main",
-      "examples_flights_rationale_1",
-      "examples_run",
-      "examples_run_rationale_1",
-      "http_server",
-      "jev_ultrafast_agent_agent",
-      "jev_ultrafast_agent_agent_close",
-      "jev_ultrafast_agent_agent_command",
-      "jev_ultrafast_agent_agent_enter",
-      "jev_ultrafast_agent_agent_exit",
-      "jev_ultrafast_agent_agent_run",
-      "jev_ultrafast_agent_agent_snapshot",
-      "jev_ultrafast_demo",
-      "jev_ultrafast_demo_close_browser",
-      "jev_ultrafast_demo_command",
-      "jev_ultrafast_demo_load_environment",
-      "jev_ultrafast_demo_main",
-      "jev_ultrafast_demo_rationale_1",
-      "jev_ultrafast_demo_response_state",
-      "jev_ultrafast_init",
-      "jev_ultrafast_init_rationale_1",
-      "json",
-      "scripts_smoke",
-      "scripts_smoke_main",
-      "scripts_smoke_rationale_1",
-      "secrets"
+      "application",
+      "default_type",
+      "dotenv",
+      "html",
+      "inlinekeyboardmarkup",
+      "telegram",
+      "telegram_ext",
+      "update",
+      "winpot_bot_access_rationale_54",
+      "winpot_bot_access_verify_access_token",
+      "winpot_bot_bot",
+      "winpot_bot_bot_callback_handler",
+      "winpot_bot_bot_create_profile_cmd",
+      "winpot_bot_bot_delete_profile_cmd",
+      "winpot_bot_bot_delete_secret_message",
+      "winpot_bot_bot_execute_automation",
+      "winpot_bot_bot_execute_visit",
+      "winpot_bot_bot_format_multi_automation_report",
+      "winpot_bot_bot_get_selected_profiles",
+      "winpot_bot_bot_handle_message",
+      "winpot_bot_bot_help_cmd",
+      "winpot_bot_bot_login_cmd",
+      "winpot_bot_bot_main",
+      "winpot_bot_bot_main_menu_keyboard",
+      "winpot_bot_bot_openrouter_key_cmd",
+      "winpot_bot_bot_post_init",
+      "winpot_bot_bot_profiles_cmd",
+      "winpot_bot_bot_profiles_keyboard",
+      "winpot_bot_bot_profiles_text",
+      "winpot_bot_bot_py_exception",
+      "winpot_bot_bot_rationale_1",
+      "winpot_bot_bot_rationale_108",
+      "winpot_bot_bot_rationale_273",
+      "winpot_bot_bot_rationale_290",
+      "winpot_bot_bot_rationale_334",
+      "winpot_bot_bot_rationale_397",
+      "winpot_bot_bot_rationale_415",
+      "winpot_bot_bot_rationale_479",
+      "winpot_bot_bot_rationale_498",
+      "winpot_bot_bot_rationale_512",
+      "winpot_bot_bot_rationale_526",
+      "winpot_bot_bot_rationale_552",
+      "winpot_bot_bot_rationale_715",
+      "winpot_bot_bot_rationale_853",
+      "winpot_bot_bot_rationale_86",
+      "winpot_bot_bot_rationale_871",
+      "winpot_bot_bot_rationale_99",
+      "winpot_bot_bot_rename_profile_cmd",
+      "winpot_bot_bot_require_access",
+      "winpot_bot_bot_settings_cmd",
+      "winpot_bot_bot_settings_keyboard",
+      "winpot_bot_bot_start_cmd",
+      "winpot_bot_bot_token_cmd",
+      "winpot_bot_bot_uid"
     ],
     "1": [
+      "anyio",
       "base64",
-      "browser_harness_admin",
-      "browser_harness_helpers",
-      "collections",
-      "examples_flights_rationale_19",
-      "examples_flights_verify",
-      "hashlib",
-      "jev_ultrafast_browser",
-      "jev_ultrafast_browser_rationale_1",
-      "os",
-      "scripts_measure_flights",
-      "scripts_measure_flights_rationale_1",
-      "scripts_measure_flights_timed",
-      "scripts_record_flights",
-      "scripts_record_flights_capture",
-      "scripts_record_flights_rationale_1",
-      "sys",
-      "tests_test_agent_test_flight_verification_rejects_wrong_trip",
-      "threading"
-    ],
-    "2": [
       "httpx",
-      "jev_ultrafast_agent",
-      "jev_ultrafast_agent_rationale_1",
       "jev_ultrafast_model",
       "jev_ultrafast_model_action_space",
-      "jev_ultrafast_model_choose",
-      "jev_ultrafast_model_field_context",
-      "jev_ultrafast_model_field_text",
-      "jev_ultrafast_model_post_json",
       "jev_ultrafast_model_rationale_1",
-      "jev_ultrafast_model_rationale_49",
-      "jev_ultrafast_model_validate_choice",
-      "jev_ultrafast_questions",
-      "jev_ultrafast_questions_rationale_1",
-      "math",
-      "tests_test_agent_test_invalid_choice_is_rejected",
-      "tests_test_agent_test_quoted_task_text_still_uses_the_llm",
-      "time"
+      "jev_ultrafast_model_rationale_5",
+      "json",
+      "os",
+      "page",
+      "re",
+      "tests_test_bot_test_jev_action_space_and_wait_validation",
+      "tests_test_bot_test_summarize_page_fallback_without_api_key",
+      "typing",
+      "winpot_bot_ai",
+      "winpot_bot_ai_extract_json",
+      "winpot_bot_ai_openrouter_chat",
+      "winpot_bot_ai_py_any",
+      "winpot_bot_ai_rationale_1",
+      "winpot_bot_ai_rationale_16",
+      "winpot_bot_ai_rationale_37",
+      "winpot_bot_browser_manager_pagecontent",
+      "winpot_bot_browser_manager_rationale_66",
+      "winpot_bot_jev_agent",
+      "winpot_bot_jev_agent_automationresult",
+      "winpot_bot_jev_agent_decide_next_step",
+      "winpot_bot_jev_agent_execute_action",
+      "winpot_bot_jev_agent_generate_field_text",
+      "winpot_bot_jev_agent_py_any",
+      "winpot_bot_jev_agent_py_exception",
+      "winpot_bot_jev_agent_py_path",
+      "winpot_bot_jev_agent_rationale_1",
+      "winpot_bot_jev_agent_rationale_145",
+      "winpot_bot_jev_agent_rationale_185",
+      "winpot_bot_jev_agent_rationale_274",
+      "winpot_bot_jev_agent_rationale_30",
+      "winpot_bot_jev_agent_rationale_362",
+      "winpot_bot_jev_agent_rationale_44",
+      "winpot_bot_jev_agent_rationale_84",
+      "winpot_bot_jev_agent_run_automation",
+      "winpot_bot_jev_agent_run_automations",
+      "winpot_bot_jev_agent_run_automations_run_one",
+      "winpot_bot_jev_agent_validate_decision",
+      "winpot_bot_summarizer",
+      "winpot_bot_summarizer_fallback_format",
+      "winpot_bot_summarizer_format_header",
+      "winpot_bot_summarizer_rationale_1",
+      "winpot_bot_summarizer_rationale_15",
+      "winpot_bot_summarizer_rationale_24",
+      "winpot_bot_summarizer_rationale_48",
+      "winpot_bot_summarizer_summarize_page"
+    ],
+    "2": [
+      "argparse",
+      "asyncio",
+      "ipaddress",
+      "logging",
+      "playwright_async_api",
+      "playwright_impl_driver",
+      "shutil",
+      "tests_test_bot_py_path",
+      "tests_test_bot_test_per_user_profile_isolation",
+      "tests_test_bot_test_profile_crud",
+      "tests_test_bot_test_validate_url_blocks_ssrf_and_schemes",
+      "urllib_parse",
+      "winpot_bot_bot_load_env",
+      "winpot_bot_bot_rationale_77",
+      "winpot_bot_browser_manager",
+      "winpot_bot_browser_manager_create_profile",
+      "winpot_bot_browser_manager_delete_profile",
+      "winpot_bot_browser_manager_get_profile_dir",
+      "winpot_bot_browser_manager_is_headless",
+      "winpot_bot_browser_manager_list_profiles",
+      "winpot_bot_browser_manager_open_profile_for_login",
+      "winpot_bot_browser_manager_profiles_root",
+      "winpot_bot_browser_manager_py_exception",
+      "winpot_bot_browser_manager_py_path",
+      "winpot_bot_browser_manager_rationale_1",
+      "winpot_bot_browser_manager_rationale_100",
+      "winpot_bot_browser_manager_rationale_112",
+      "winpot_bot_browser_manager_rationale_126",
+      "winpot_bot_browser_manager_rationale_140",
+      "winpot_bot_browser_manager_rationale_155",
+      "winpot_bot_browser_manager_rationale_170",
+      "winpot_bot_browser_manager_rationale_216",
+      "winpot_bot_browser_manager_rationale_242",
+      "winpot_bot_browser_manager_rationale_31",
+      "winpot_bot_browser_manager_rationale_77",
+      "winpot_bot_browser_manager_rename_profile",
+      "winpot_bot_browser_manager_validate_url",
+      "winpot_bot_browser_manager_visit_with_profile",
+      "winpot_bot_browser_manager_visit_with_profiles",
+      "winpot_bot_browser_manager_visit_with_profiles_run_one",
+      "winpot_bot_cli",
+      "winpot_bot_cli_main",
+      "winpot_bot_cli_rationale_1",
+      "winpot_bot_cli_rationale_21",
+      "winpot_bot_cli_run"
     ],
     "3": [
-      "copy",
-      "fixture",
-      "pytest",
-      "tests_test_agent",
-      "tests_test_agent_decision",
-      "tests_test_agent_rationale_1",
-      "tests_test_agent_runner",
-      "tests_test_agent_test_changed_field_context_does_not_reuse_generated_text",
-      "tests_test_agent_test_generated_text_reused_only_for_identical_retry_context",
-      "tests_test_agent_test_loading_waits_do_not_trigger_no_progress_stop",
-      "tests_test_agent_test_missing_text_credential_stops_before_guessing",
-      "tests_test_agent_test_stale_observation_preserves_executed_action",
-      "unittest_mock"
+      "monkeypatch",
+      "tests_test_bot_test_per_user_settings_isolation",
+      "tests_test_bot_test_settings_persistence",
+      "winpot_bot_settings",
+      "winpot_bot_settings_botsettings",
+      "winpot_bot_settings_cycle_max_concurrency",
+      "winpot_bot_settings_env_headless_default",
+      "winpot_bot_settings_load_settings",
+      "winpot_bot_settings_py_path",
+      "winpot_bot_settings_rationale_1",
+      "winpot_bot_settings_rationale_103",
+      "winpot_bot_settings_rationale_110",
+      "winpot_bot_settings_rationale_117",
+      "winpot_bot_settings_rationale_128",
+      "winpot_bot_settings_rationale_138",
+      "winpot_bot_settings_rationale_145",
+      "winpot_bot_settings_rationale_152",
+      "winpot_bot_settings_rationale_19",
+      "winpot_bot_settings_rationale_43",
+      "winpot_bot_settings_rationale_76",
+      "winpot_bot_settings_rationale_89",
+      "winpot_bot_settings_rationale_96",
+      "winpot_bot_settings_resolve_path",
+      "winpot_bot_settings_save_settings",
+      "winpot_bot_settings_set_access_token",
+      "winpot_bot_settings_set_default_url",
+      "winpot_bot_settings_set_openrouter_api_key",
+      "winpot_bot_settings_set_system_prompt",
+      "winpot_bot_settings_toggle_confirm_before_bet",
+      "winpot_bot_settings_toggle_headless",
+      "winpot_bot_settings_toggle_summary_mode",
+      "winpot_bot_settings_toggle_vision"
     ],
     "4": [
-      "jev_ultrafast_agent_agent_init",
-      "jev_ultrafast_browser_browser",
-      "jev_ultrafast_browser_browser_act",
-      "jev_ultrafast_browser_browser_call",
-      "jev_ultrafast_browser_browser_close",
-      "jev_ultrafast_browser_browser_evaluate",
-      "jev_ultrafast_browser_browser_fresh",
-      "jev_ultrafast_browser_browser_init",
-      "jev_ultrafast_browser_browser_observe",
-      "scripts_check_guards",
-      "scripts_check_guards_main",
-      "scripts_check_guards_rationale_1",
-      "urllib_parse"
+      "github_workflows_build",
+      "github_workflows_build_build_runs_on",
+      "github_workflows_build_build_steps",
+      "github_workflows_build_build_strategy",
+      "github_workflows_build_env_access_url",
+      "github_workflows_build_env_telegram_bot_token",
+      "github_workflows_build_include_artifact",
+      "github_workflows_build_include_os",
+      "github_workflows_build_jobs",
+      "github_workflows_build_jobs_build",
+      "github_workflows_build_matrix_include",
+      "github_workflows_build_name",
+      "github_workflows_build_on",
+      "github_workflows_build_on_push",
+      "github_workflows_build_on_workflow_dispatch",
+      "github_workflows_build_push_tags",
+      "github_workflows_build_steps_env",
+      "github_workflows_build_steps_name",
+      "github_workflows_build_steps_run",
+      "github_workflows_build_steps_uses",
+      "github_workflows_build_steps_with",
+      "github_workflows_build_strategy_matrix",
+      "github_workflows_build_with_name",
+      "github_workflows_build_with_path"
     ],
     "5": [
-      "pathlib",
-      "pil",
-      "scripts_render_demo",
-      "scripts_render_demo_font",
-      "scripts_render_demo_mono",
-      "scripts_render_demo_rationale_1",
-      "scripts_render_fixture",
-      "scripts_render_fixture_rationale_1",
-      "statistics",
-      "subprocess"
+      "pytest",
+      "tests_test_bot",
+      "tests_test_bot_rationale_1",
+      "tests_test_bot_test_router_and_extract_json",
+      "tests_test_bot_test_sanitize_profile_name",
+      "tests_test_bot_test_select_model_modes",
+      "tests_test_bot_test_ui_menu_helpers",
+      "winpot_bot_bot_main_menu_text",
+      "winpot_bot_bot_mask_secret",
+      "winpot_bot_bot_settings_text",
+      "winpot_bot_browser_manager_rationale_82",
+      "winpot_bot_browser_manager_sanitize_profile_name",
+      "winpot_bot_router",
+      "winpot_bot_router_parse_route_json",
+      "winpot_bot_router_py_any",
+      "winpot_bot_router_rationale_1",
+      "winpot_bot_router_rationale_113",
+      "winpot_bot_router_rationale_52",
+      "winpot_bot_router_resolve_profiles",
+      "winpot_bot_router_route_message",
+      "winpot_bot_summarizer_rationale_36",
+      "winpot_bot_summarizer_select_model"
     ],
     "6": [
-      "jev_ultrafast_static_app",
-      "jev_ultrafast_static_app_call",
-      "jev_ultrafast_static_app_controls",
-      "jev_ultrafast_static_app_escape",
-      "jev_ultrafast_static_app_goals",
-      "jev_ultrafast_static_app_percent",
-      "jev_ultrafast_static_app_perform",
-      "jev_ultrafast_static_app_render"
+      "build_exe",
+      "build_exe_main",
+      "build_exe_rationale_1",
+      "pathlib",
+      "subprocess",
+      "sys",
+      "winpot_bot_browser_manager_ensure_chromium_installed",
+      "winpot_bot_browser_manager_rationale_57",
+      "winpot_bot_paths",
+      "winpot_bot_paths_app_dir",
+      "winpot_bot_paths_bundle_dir",
+      "winpot_bot_paths_py_path",
+      "winpot_bot_paths_rationale_1",
+      "winpot_bot_paths_rationale_10",
+      "winpot_bot_paths_rationale_17"
     ],
     "7": [
-      "jev_ultrafast_browser_browser_operation",
-      "jev_ultrafast_browser_browser_operation_call",
-      "jev_ultrafast_browser_browser_operation_evaluate",
-      "parametrize",
-      "tests_test_agent_test_interrupted_dropdown_mutation_cannot_be_retried_as_stale",
-      "tests_test_agent_test_observation_is_one_atomic_browser_read",
-      "tests_test_agent_test_text_helper_rejects_invalid_values"
+      "dataclasses",
+      "tests_test_bot_test_access_token_validation",
+      "time",
+      "winpot_bot_access",
+      "winpot_bot_access_accessstatus",
+      "winpot_bot_access_parse_access_response",
+      "winpot_bot_access_py_any",
+      "winpot_bot_access_rationale_1",
+      "winpot_bot_access_rationale_15",
+      "winpot_bot_access_rationale_23"
     ],
     "8": [
-      "tests_test_agent_choice",
-      "tests_test_agent_test_all_heads_are_one_request_and_only_matching_head_executes",
-      "tests_test_agent_test_all_heads_are_one_request_and_only_matching_head_executes_post",
-      "tests_test_agent_test_click_cannot_consume_a_text_target",
-      "tests_test_agent_test_click_cannot_consume_a_text_target_post",
-      "tests_test_agent_test_target_head_receives_control_state_and_full_next_step_rules",
-      "tests_test_agent_test_target_head_receives_control_state_and_full_next_step_rules_post"
+      "jev_ultrafast_init",
+      "jev_ultrafast_init_rationale_1"
     ],
     "9": [
-      "basehttprequesthandler",
-      "jev_ultrafast_demo_handler",
-      "jev_ultrafast_demo_handler_do_get",
-      "jev_ultrafast_demo_handler_do_post",
-      "jev_ultrafast_demo_handler_log_message",
-      "jev_ultrafast_demo_handler_send"
-    ],
-    "10": [
-      "jev_ultrafast_browser_fingerprint",
-      "tests_test_agent_page",
-      "tests_test_agent_test_executor_rejects_a_stale_page_before_browser_input",
-      "tests_test_agent_test_fingerprint_tracks_values_and_identity_not_screenshots",
-      "tests_test_agent_test_one_index_per_node_with_operation_specific_targets"
-    ],
-    "11": [
-      "jev_ultrafast_browser_rationale_17",
-      "jev_ultrafast_browser_stalepage",
-      "tests_test_agent_test_navigation_during_prediction_reobserves_without_action",
-      "tests_test_agent_test_stale_decision_is_consumed_before_any_mutation",
-      "valueerror"
-    ],
-    "12": [
       "jev_ultrafast_snapshot"
     ],
-    "13": [
-      "pkg_jev_ultrafast"
+    "10": [
+      "pkg_winpot_bot"
+    ],
+    "11": [
+      "winpot_bot_init"
     ]
   },
   "cohesion": {
-    "0": 0.14022988505747128,
-    "1": 0.14619883040935672,
-    "2": 0.20915032679738563,
-    "3": 0.21794871794871795,
-    "4": 0.34615384615384615,
-    "5": 0.24444444444444444,
-    "6": 0.4642857142857143,
-    "7": 0.3333333333333333,
-    "8": 0.38095238095238093,
-    "9": 0.4666666666666667,
-    "10": 0.5,
-    "11": 0.4,
-    "12": 1.0,
-    "13": 1.0
+    "0": 0.10412299091544375,
+    "1": 0.07764705882352942,
+    "2": 0.0797979797979798,
+    "3": 0.16733870967741934,
+    "4": 0.08333333333333333,
+    "5": 0.15584415584415584,
+    "6": 0.1619047619047619,
+    "7": 0.24444444444444444,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0
   },
   "gods": [
     {
-      "id": "jev_ultrafast_agent_agent",
-      "label": "Agent",
-      "degree": 20
+      "id": "winpot_bot_settings_load_settings",
+      "label": "load_settings()",
+      "degree": 30
     },
     {
-      "id": "jev_ultrafast_browser_stalepage",
-      "label": "StalePage",
-      "degree": 20
+      "id": "winpot_bot_bot_handle_message",
+      "label": "handle_message()",
+      "degree": 28
     },
     {
-      "id": "jev_ultrafast_browser_browser",
-      "label": "Browser",
-      "degree": 14
+      "id": "winpot_bot_bot_callback_handler",
+      "label": "callback_handler()",
+      "degree": 26
     },
     {
-      "id": "tests_test_agent_page",
-      "label": "page()",
-      "degree": 11
+      "id": "winpot_bot_settings_botsettings",
+      "label": "BotSettings",
+      "degree": 19
     },
     {
-      "id": "jev_ultrafast_browser_browser_operation",
-      "label": "browser_operation()",
-      "degree": 11
+      "id": "winpot_bot_bot_require_access",
+      "label": "_require_access()",
+      "degree": 18
     },
     {
-      "id": "jev_ultrafast_model_choose",
-      "label": "choose()",
-      "degree": 10
+      "id": "winpot_bot_settings_save_settings",
+      "label": "save_settings()",
+      "degree": 18
     },
     {
-      "id": "jev_ultrafast_model_field_text",
-      "label": "field_text()",
-      "degree": 9
+      "id": "winpot_bot_bot_uid",
+      "label": "_uid()",
+      "degree": 17
     },
     {
-      "id": "scripts_check_guards_main",
+      "id": "winpot_bot_bot_main",
       "label": "main()",
-      "degree": 9
+      "degree": 17
     },
     {
-      "id": "examples_flights_main",
-      "label": "main()",
-      "degree": 8
+      "id": "winpot_bot_browser_manager_pagecontent",
+      "label": "PageContent",
+      "degree": 15
     },
     {
-      "id": "examples_flights_verify",
-      "label": "verify()",
-      "degree": 8
+      "id": "winpot_bot_summarizer_summarize_page",
+      "label": "summarize_page()",
+      "degree": 15
     }
   ],
   "surprises": [
     {
-      "source": "main()",
-      "target": "StalePage",
+      "source": "test_sanitize_profile_name()",
+      "target": "sanitize_profile_name()",
       "source_files": [
-        "scripts/check_guards.py",
-        "jev_ultrafast/browser.py"
-      ],
-      "confidence": "INFERRED",
-      "relation": "uses",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "test_executor_rejects_a_stale_page_before_browser_input()",
-      "target": "StalePage",
-      "source_files": [
-        "tests/test_agent.py",
-        "jev_ultrafast/browser.py"
-      ],
-      "confidence": "INFERRED",
-      "relation": "uses",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "test_stale_decision_is_consumed_before_any_mutation()",
-      "target": "StalePage",
-      "source_files": [
-        "tests/test_agent.py",
-        "jev_ultrafast/browser.py"
-      ],
-      "confidence": "INFERRED",
-      "relation": "uses",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `test_stale_decision_is_consumed_before_any_mutation()` unexpectedly reaches hub `StalePage`"
-    },
-    {
-      "source": "test_missing_text_credential_stops_before_guessing()",
-      "target": "field_text()",
-      "source_files": [
-        "tests/test_agent.py",
-        "jev_ultrafast/model.py"
+        "tests/test_bot.py",
+        "winpot_bot/browser_manager.py"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; bridges separate communities; peripheral node `test_missing_text_credential_stops_before_guessing()` unexpectedly reaches hub `field_text()`"
+      "why": "connects across different repos/directories; peripheral node `test_sanitize_profile_name()` unexpectedly reaches hub `sanitize_profile_name()`"
     },
     {
-      "source": "test_changed_field_context_does_not_reuse_generated_text()",
-      "target": "StalePage",
+      "source": "test_ui_menu_helpers()",
+      "target": "_profiles_keyboard()",
       "source_files": [
-        "tests/test_agent.py",
-        "jev_ultrafast/browser.py"
+        "tests/test_bot.py",
+        "winpot_bot/bot.py"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "test_ui_menu_helpers()",
+      "target": "BotSettings",
+      "source_files": [
+        "tests/test_bot.py",
+        "winpot_bot/settings.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "test_router_and_extract_json()",
+      "target": "extract_json()",
+      "source_files": [
+        "tests/test_bot.py",
+        "winpot_bot/ai.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "test_access_token_validation()",
+      "target": "parse_access_response()",
+      "source_files": [
+        "tests/test_bot.py",
+        "winpot_bot/access.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `test_access_token_validation()` unexpectedly reaches hub `parse_access_response()`"
     }
   ],
-  "questions": [
-    {
-      "type": "bridge_node",
-      "question": "Why does `Agent` connect `Community 0` to `Community 1`, `Community 2`, `Community 11`, `Community 4`?",
-      "why": "High betweenness centrality (0.113) - this node is a cross-community bridge."
-    },
-    {
-      "type": "verify_inferred",
-      "question": "Are the 2 inferred relationships involving `Agent` (e.g. with `Browser` and `StalePage`) actually correct?",
-      "why": "`Agent` has 2 INFERRED edges - model-reasoned connections that need verification."
-    },
-    {
-      "type": "isolated_nodes",
-      "question": "What connects `jev-ultrafast` to the rest of the system?",
-      "why": "1 weakly-connected nodes found - possible missing edges."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `Community 0` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.14022988505747128 - nodes in this community are weakly interconnected."
-    },
-    {
-      "type": "bridge_node",
-      "question": "Why does `StalePage` connect `Community 11` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 7`, `Community 10`?",
-      "why": "High betweenness centrality (0.101) - this node is a cross-community bridge."
-    },
-    {
-      "type": "verify_inferred",
-      "question": "Are the 4 inferred relationships involving `StalePage` (e.g. with `Agent` and `main()`) actually correct?",
-      "why": "`StalePage` has 4 INFERRED edges - model-reasoned connections that need verification."
-    },
-    {
-      "type": "low_cohesion",
-      "question": "Should `Community 1` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.14619883040935672 - nodes in this community are weakly interconnected."
-    }
-  ]
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
 }

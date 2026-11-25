@@ -13,8 +13,8 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact: winpot-bot-linux
-          # - os: macos-latest
-          #   artifact: winpot-bot-macos
+          - os: macos-latest
+            artifact: winpot-bot-macos
           # - os: windows-latest
           #   artifact: winpot-bot-windows.exe
 
