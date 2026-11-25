@@ -296,6 +296,7 @@ async def _execute_visit(update: Update, profiles: list[str], url: str) -> None:
 
     uid = _uid(update)
     settings = load_settings(uid)
+    logger.info("User %s: visiting %s with profiles %s", uid, url, profiles)
     status_msg = await chat_message.reply_text(
         f"⏳ Visiting {url} using profile(s): {', '.join(profiles)}..."
     )
@@ -331,16 +332,18 @@ async def _execute_automation(
     profiles: list[str],
     url: str,
     goal: str,
+    is_bet: bool = False,
     confirmed: bool = False,
 ) -> None:
-    """Run multi-step Jev automation across `profiles`, pausing for confirmation if enabled."""
+    """Run multi-step Jev automation across `profiles`, pausing for confirmation only for bets."""
     chat_message = update.effective_message
     if not chat_message:
         return
 
     uid = _uid(update)
     settings = load_settings(uid)
-    dry_run = settings.confirm_before_bet and not confirmed
+    dry_run = settings.confirm_before_bet and is_bet and not confirmed
+    logger.info("User %s: automating %s (is_bet=%s, dry_run=%s) with profiles %s", uid, url, is_bet, dry_run, profiles)
     status_msg = await chat_message.reply_text(
         f"🤖 {'Preparing' if dry_run else 'Running'} on {url} "
         f"for {len(profiles)} profile(s): {', '.join(profiles)}..."
@@ -722,6 +725,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             pending["profiles"],
             pending["url"],
             pending["goal"],
+            is_bet=True,
             confirmed=True,
         )
     elif data == "cancel_bet_run":
@@ -833,7 +837,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if tool == "visit":
         await _execute_visit(update, routed["profiles"], routed["url"])
     elif tool == "automate":
-        await _execute_automation(update, context, routed["profiles"], routed["url"], routed["goal"])
+        await _execute_automation(
+            update,
+            context,
+            routed["profiles"],
+            routed["url"],
+            routed["goal"],
+            is_bet=routed.get("is_bet", False),
+        )
     elif tool == "create_profile":
         try:
             path = create_profile(routed["name"], user_id=uid)
@@ -904,9 +915,11 @@ def main() -> None:
     app = (
         Application.builder()
         .token(token)
-        .connect_timeout(15.0)
+        .connect_timeout(30.0)
         .read_timeout(30.0)
         .write_timeout(30.0)
+        .get_updates_connect_timeout(30.0)
+        .get_updates_read_timeout(30.0)
         .post_init(_post_init)
         .build()
     )
@@ -925,7 +938,7 @@ def main() -> None:
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     logger.info("Telegram browser bot is running...")
-    app.run_polling()
+    app.run_polling(bootstrap_retries=-1)
 
 
 if __name__ == "__main__":

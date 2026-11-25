@@ -179,8 +179,14 @@ async def visit_with_profile(
         try:
             page = context.pages[0] if context.pages else await context.new_page()
             await page.goto(target_url, wait_until="domcontentloaded", timeout=timeout_ms)
-            # Allow dynamic client-side content a brief moment to settle.
-            await page.wait_for_timeout(1500)
+            try:
+                await page.wait_for_function(
+                    "() => document.querySelectorAll('a,button,input').length > 5",
+                    timeout=5000,
+                )
+            except Exception:
+                pass
+            await page.wait_for_timeout(400)
 
             title = (await page.title()).strip()
             final_url = page.url

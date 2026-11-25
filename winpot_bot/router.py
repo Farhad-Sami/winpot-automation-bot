@@ -75,6 +75,7 @@ def parse_route_json(
             "profiles": _resolve_profiles(data.get("profiles"), selected_profiles, saved_profiles),
             "url": url,
             "goal": goal,
+            "is_bet": bool(data.get("is_bet", False)),
         }
 
     if tool in {"create_profile", "delete_profile"}:
@@ -122,8 +123,9 @@ async def route_message(
         "You are the command router for a Telegram browser automation bot. "
         "Convert the user's message into ONE JSON tool call. Return ONLY valid JSON.\n\n"
         "Available tools:\n"
-        '1. {"tool": "automate", "profiles": ["..."], "url": "https://...", "goal": "..."}\n'
-        "   Use when the user wants to visit a URL AND do something (wait, click, type, extract specific info).\n"
+        '1. {"tool": "automate", "profiles": ["..."], "url": "https://...", "goal": "...", "is_bet": true|false}\n'
+        "   Use when the user wants to visit a URL AND do something (wait, click, type, extract specific info). "
+        "Set is_bet=true ONLY if the user asks to place a bet/wager; false for waiting, browsing, or checking.\n"
         '2. {"tool": "visit", "profiles": ["..."], "url": "https://..."}\n'
         "   Use when the user only wants to open/visit a URL and get a general summary.\n"
         '3. {"tool": "create_profile", "name": "..."}\n'

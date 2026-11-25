@@ -5,8 +5,10 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import logging
 import os
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -14,9 +16,11 @@ from typing import Any
 from playwright.async_api import Page, async_playwright
 
 from jev_ultrafast.model import action_space
-from winpot_bot.ai import extract_json, openrouter_chat
+from winpot_bot.ai import extract_json, openrouter_chat, openrouter_decisions
 from winpot_bot.browser_manager import PageContent, get_profile_dir, validate_url
 from winpot_bot.paths import bundle_dir
+
+logger = logging.getLogger(__name__)
 
 SNAPSHOT_JS_PATH = bundle_dir() / "jev_ultrafast" / "snapshot.js"
 MAX_STEPS = 15
@@ -72,6 +76,62 @@ def validate_decision(
     }
 
 
+def _compress_visible_text(text: str, goal: str, max_chars: int = 3500) -> str:
+    """Keep the most goal-relevant lines when visible text exceeds max_chars."""
+    if len(text) <= max_chars:
+        return text
+    keywords = {w.lower() for w in re.findall(r"[a-zA-Z0-9]{3,}", goal)}
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    if not keywords:
+        return text[:max_chars]
+    scored = sorted(
+        enumerate(lines),
+        key=lambda item: (-sum(1 for kw in keywords if kw in item[1].lower()), item[0]),
+    )
+    chosen: list[tuple[int, str]] = []
+    total = 0
+    for idx, ln in scored:
+        if total + len(ln) + 1 > max_chars:
+            continue
+        chosen.append((idx, ln))
+        total += len(ln) + 1
+    chosen.sort(key=lambda x: x[0])
+    return "\n".join(ln for _, ln in chosen) or text[:max_chars]
+
+
+async def _dismiss_blocking_modal(page: Page, goal: str) -> bool:
+    """Deterministically dismiss promo/verification overlays when not part of the goal."""
+    goal_lower = goal.lower()
+    if any(k in goal_lower for k in ("verify", "verification", "sms", "bono", "modal")):
+        return False
+
+    dismissed = await page.evaluate(
+        """() => {
+            const labels = ['atrás', 'cerrar', 'close', 'no gracias', 'omitir', 'skip', '×', '✕'];
+            const sel = '[role="dialog"], .modal, [class*="modal"], [class*="popup"]';
+            const dialogs = [...document.querySelectorAll(sel)];
+            for (const dlg of dialogs) {
+                const style = getComputedStyle(dlg);
+                if (style.display === 'none' || style.visibility === 'hidden') continue;
+                const btns = dlg.querySelectorAll('button, a, [role="button"]');
+                for (const b of btns) {
+                    const txt = (b.innerText || b.getAttribute('aria-label') || '').trim().toLowerCase();
+                    if (labels.some(l => txt === l || txt.includes(l))) {
+                        b.click();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }"""
+    )
+    if dismissed:
+        logger.info("Dismissed blocking modal overlay")
+        await page.wait_for_timeout(400)
+        return True
+    return False
+
+
 async def decide_next_step(
     snapshot: dict[str, Any],
     goal: str,
@@ -81,63 +141,96 @@ async def decide_next_step(
     custom_instructions: str = "",
     dry_run_before_submit: bool = False,
 ) -> tuple[dict[str, Any], dict[str, dict[str, dict[str, Any]]], dict[str, dict[str, Any]]]:
-    """Ask the decision model for the next bounded operation and target."""
+    """Ask typesafe/jev-1.14 (OpenRouter Decisions API) for the next bounded operation and target."""
     elements, targets, controls = action_space(snapshot["actions"])
-    valid_ops = sorted(set(targets) | set(controls) | {"WAIT", "DONE", "BLOCKED"})
-
-    model = (
-        os.getenv("AI_MODEL_DECISIONS_API")
-        or os.getenv("AI_MODEL_DECISION")
-        or os.getenv("AI_MODEL")
-        or "typesafe/jev-1.14"
-    ).strip()
-
-    state_summary = {
-        "goal": goal,
-        "url": snapshot["url"],
-        "title": snapshot["title"],
-        "visible_text": snapshot["text"][:3500],
-        "elements": elements[:120],
-        "valid_operations": valid_ops,
-        "recent_steps": history[-8:],
+    op_labels = {
+        "CLICK": "Click an element, button, link, or menu option.",
+        "TYPE_TEXT": "Enter or replace text in an editable field.",
+        "SELECT": "Select an observed dropdown value.",
     }
-
-    system_prompt = (
-        "You are a precise browser automation decision engine. "
-        "Choose ONE next operation from valid_operations to achieve the user's goal.\n"
-        "Return ONLY valid JSON with keys:\n"
-        '- "operation": one of valid_operations\n'
-        '- "target": element index string (required for CLICK, TYPE_TEXT, SELECT; null otherwise)\n'
-        '- "wait_seconds": integer 1-30 (only when operation is WAIT; default 3)\n'
-        '- "reason": brief 1-sentence reason\n'
-        "Use WAIT if the goal asks to wait on the page or content is still loading. "
-        "Use DONE when the goal is satisfied. Use BLOCKED if impossible."
+    operations: dict[str, str] = {k: op_labels[k] for k in targets}
+    operations.update({k: v["label"] for k, v in controls.items()})
+    operations.update(
+        WAIT="Wait on the page (for requested wait duration or dynamic content loading).",
+        DONE="Every requirement in the goal is visibly satisfied.",
+        BLOCKED="No supported operation can progress.",
     )
+
+    rules = [
+        "Choose the best next operation to achieve the goal.",
+        "If a promo or verification modal blocks the page, dismiss it first (Atrás/Close/×). "
+        "If an unavoidable SMS/CAPTCHA gate blocks progress, choose BLOCKED.",
+    ]
     if dry_run_before_submit:
-        system_prompt += (
-            "\n\nSAFETY RULE: Do NOT click any final 'Place Bet', 'Confirm', or 'Submit' button. "
-            "Stop with DONE once the betslip/form is filled and ready for final confirmation."
+        rules.append(
+            "SAFETY: Do NOT click any final Place Bet / Confirm / Submit button; "
+            "choose DONE once the betslip/form is ready."
         )
     if custom_instructions.strip():
-        system_prompt += f"\n\nStanding instructions:\n{custom_instructions.strip()}"
+        rules.append(custom_instructions.strip())
 
-    text_block = json.dumps(state_summary, ensure_ascii=False)
-    user_content: list[dict[str, Any]] | str = (
-        [
-            {"type": "text", "text": text_block},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{screenshot_b64}"}},
-        ]
-        if screenshot_b64
-        else text_block
-    )
+    questions: dict[str, Any] = {
+        "operation": {
+            "type": "choice",
+            "criteria": operations,
+            "instructions": {"goal": goal, "rules": rules},
+        },
+        "wait_seconds": {
+            "type": "choice",
+            "criteria": {
+                "3": "Wait 3 seconds",
+                "5": "Wait 5 seconds",
+                "10": "Wait 10 seconds",
+                "15": "Wait 15 seconds",
+                "30": "Wait 30 seconds",
+            },
+            "instructions": {"goal": goal, "rules": "If WAIT is chosen, pick the closest wait duration."},
+        },
+    }
+    for op, candidates in targets.items():
+        questions[op.lower() + "_target"] = {
+            "type": "choice",
+            "criteria": {
+                idx: {
+                    "element": f"[{idx}] {a['label']}",
+                    "current_value": a.get("current_value", a.get("value", "")),
+                    **{k: a[k] for k in ("role", "checked", "selected", "expanded") if k in a},
+                }
+                for idx, a in candidates.items()
+            },
+            "instructions": {"goal": goal, "operation": op},
+        }
 
-    raw = await openrouter_chat(
-        model=model,
-        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_content}],
-        api_key=api_key,
-        timeout=35.0,
+    state: dict[str, Any] = {
+        "page": {
+            "url": snapshot["url"],
+            "title": snapshot["title"],
+            "text": _compress_visible_text(snapshot["text"], goal, 3500),
+        },
+        "elements": elements[:120],
+        "recent_steps": history[-8:],
+    }
+    if screenshot_b64:
+        state["screenshot"] = f"data:image/jpeg;base64,{screenshot_b64}"
+
+    model = (os.getenv("AI_MODEL_DECISIONS_API") or "typesafe/jev-1.14").strip()
+    started = time.perf_counter()
+    result = await openrouter_decisions(model=model, state=state, questions=questions, api_key=api_key)
+    elapsed = time.perf_counter() - started
+    answers = result.get("answers", result)
+    op_ans = answers.get("operation", {})
+    op = str(op_ans.get("choice", "")).strip().upper()
+    conf = op_ans.get("confidence", 0.0)
+    logger.info("Jev decision: %s (conf=%s, %.2fs)", op, conf, elapsed)
+    target = None
+    if op in targets:
+        target = str(answers.get(op.lower() + "_target", {}).get("choice", "")).strip()
+    wait_choice = answers.get("wait_seconds", {}).get("choice", DEFAULT_WAIT_SECONDS)
+    validated = validate_decision(
+        {"operation": op, "target": target, "wait_seconds": wait_choice, "reason": ""},
+        targets,
+        controls,
     )
-    validated = validate_decision(extract_json(raw), targets, controls)
     return validated, targets, controls
 
 
@@ -287,9 +380,17 @@ async def run_automation(
         try:
             page = context.pages[0] if context.pages else await context.new_page()
             await page.goto(target_url, wait_until="domcontentloaded", timeout=30000)
-            await page.wait_for_timeout(1500)
+            try:
+                await page.wait_for_function(
+                    "() => document.querySelectorAll('a,button,input').length > 5",
+                    timeout=5000,
+                )
+            except Exception:
+                pass
+            await page.wait_for_timeout(400)
 
             for _ in range(max_steps):
+                await _dismiss_blocking_modal(page, goal)
                 snapshot = await page.evaluate(snapshot_js)
                 if not snapshot:
                     status = "blocked"
@@ -319,6 +420,7 @@ async def run_automation(
                 step_desc = await _execute_action(
                     page, decision, targets, controls, goal, snapshot, api_key=api_key
                 )
+                logger.info("[%s] %s", profile_dir.name, step_desc)
                 steps.append(step_desc)
 
             title = (await page.title()).strip()

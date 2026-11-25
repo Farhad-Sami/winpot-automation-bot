@@ -20,7 +20,7 @@ from winpot_bot.browser_manager import (
     sanitize_profile_name,
     validate_url,
 )
-from winpot_bot.jev_agent import validate_decision
+from winpot_bot.jev_agent import _compress_visible_text, validate_decision
 from winpot_bot.router import parse_route_json
 from winpot_bot.settings import (
     BotSettings,
@@ -175,7 +175,23 @@ def test_router_and_extract_json() -> None:
         "profiles": ["test1"],
         "url": "https://www.winpot.mx/sport",
         "goal": "wait 5s",
+        "is_bet": False,
     }
+
+    bet = parse_route_json(
+        '{"tool": "automate", "profiles": ["winpot"], "url": "https://www.winpot.mx/sport", '
+        '"goal": "bet 100 on America", "is_bet": true}',
+        selected_profiles=[],
+        saved_profiles=["winpot"],
+    )
+    assert bet["is_bet"] is True
+
+
+def test_compress_visible_text_prioritizes_goal_keywords() -> None:
+    filler = "\n".join(f"Unrelated footer line {i}" for i in range(200))
+    target = "America vs Chivas +145 Moneyline"
+    compressed = _compress_visible_text(f"{filler}\n{target}", "bet on America vs Chivas", max_chars=200)
+    assert target in compressed
 
     visit_default = parse_route_json(
         '{"tool": "visit", "url": "https://www.winpot.mx/sport"}',

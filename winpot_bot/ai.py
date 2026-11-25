@@ -10,6 +10,7 @@ from typing import Any
 import httpx
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions"
 
 
 def extract_json(raw: str) -> dict[str, Any]:
@@ -41,10 +42,11 @@ async def openrouter_chat(
 
     payload: dict[str, Any] = {"model": model, "messages": messages}
     effort = os.getenv("AI_REASONING_EFFORT", "off").strip().lower()
-    if effort in {"off", "none"}:
-        payload["reasoning"] = {"effort": "none"}
-    elif effort in {"low", "medium", "high"}:
-        payload["reasoning"] = {"effort": effort}
+    if "qwen3.7" in model.lower():
+        if effort in {"off", "none"}:
+            payload["reasoning"] = {"effort": "none"}
+        elif effort in {"low", "medium", "high"}:
+            payload["reasoning"] = {"effort": effort}
 
     headers = {
         "Authorization": f"Bearer {cleaned_key}",
@@ -52,5 +54,30 @@ async def openrouter_chat(
     }
     async with httpx.AsyncClient(timeout=timeout) as client:
         resp = await client.post(OPENROUTER_URL, json=payload, headers=headers)
-        resp.raise_for_status()
+        if resp.is_error:
+            raise RuntimeError(f"OpenRouter {resp.status_code} ({model}): {resp.text[:250]}")
         return str(resp.json()["choices"][0]["message"]["content"]).strip()
+
+
+async def openrouter_decisions(
+    model: str,
+    state: dict[str, Any],
+    questions: dict[str, Any],
+    api_key: str,
+    timeout: float = 35.0,
+) -> dict[str, Any]:
+    """Call OpenRouter's Decisions API (/api/alpha/decisions) for typesafe/jev-1.14."""
+    cleaned_key = api_key.strip()
+    if not cleaned_key:
+        raise RuntimeError("OpenRouter API key is not set. Set it in /settings or /openrouter_key <key>.")
+
+    payload = {"model": model, "state": state, "questions": questions}
+    headers = {
+        "Authorization": f"Bearer {cleaned_key}",
+        "Content-Type": "application/json",
+    }
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        resp = await client.post(OPENROUTER_DECISIONS_URL, json=payload, headers=headers)
+        if resp.is_error:
+            raise RuntimeError(f"OpenRouter Decisions {resp.status_code} ({model}): {resp.text[:250]}")
+        return resp.json()
